@@ -1,8 +1,9 @@
 // Página server component: obtenemos searchParams vía props para evitar CSR y el Suspense warning.
 import { FadeIn } from "@/components/ui/FadeIn";
-import { GameProvider, useGame } from "@/lib/store/gameStore";
+import { GameProvider } from "@/lib/store/gameStore";
 import { Board } from "@/components/game/Board";
 import { Hud } from "@/components/game/Hud";
+import { RestartButton } from "../../components/game/RestartButton";
 import type { Mode } from "@/lib/core/types";
 import Link from "next/link";
 
@@ -41,14 +42,4 @@ export default function GamePage({ searchParams }: { searchParams: { mode?: stri
     );
 }
 
-function RestartButton() {
-    const { reset } = useGame();
-    return (
-        <button
-            onClick={() => reset()}
-            className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800/80"
-        >
-            Reiniciar
-        </button>
-    );
-}
+// RestartButton movido a componente cliente dedicado para evitar uso de hook en server.
