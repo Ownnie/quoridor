@@ -1,5 +1,5 @@
 import type { GameState, PlayerId, Pos } from "./types";
-import { canMoveSimple, applyMoveSimple, canPlaceWall, applyPlaceWall } from "./rules";
+import { canMove, applyMove, canPlaceWall, applyPlaceWall } from "./rules";
 
 export type Action =
     | { kind: "move"; player: PlayerId; to: Pos }
@@ -10,8 +10,8 @@ export function reduce(s: GameState, a: Action): GameState {
     if (a.player !== s.turn) return s;
 
     if (a.kind === "move") {
-        if (!canMoveSimple(s, a.player, a.to)) return s;
-        return applyMoveSimple(s, a.player, a.to);
+        if (!canMove(s, a.player, a.to)) return s;
+        return applyMove(s, a.player, a.to);
     }
 
     if (a.kind === "placeWall") {

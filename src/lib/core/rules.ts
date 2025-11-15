@@ -40,21 +40,65 @@ export function neighbors(s: GameState, p: Pos): Pos[] {
     return out;
 }
 
-/* ---------- Movimiento simple ---------- */
+/* ---------- Movimiento completo (saltos y diagonales) ---------- */
 
-export function canMoveSimple(s: GameState, player: PlayerId, to: Pos) {
+function eq(a: Pos, b: Pos) { return a.r === b.r && a.c === b.c; }
+function occupied(s: GameState, p: Pos) { return eq(s.pawn[0], p) || eq(s.pawn[1], p); }
+
+/**
+ * Genera todos los movimientos legales para un jugador según Quoridor:
+ * - Paso ortogonal si no hay muro y la celda no está ocupada.
+ * - Si el vecino ortogonal está ocupado por el rival:
+ *   - Salto por detrás si no hay muro entre rival y la celda detrás (y está en tablero).
+ *   - En caso contrario, diagonales alrededor del rival si no hay muro entre rival y esas diagonales.
+ */
+export function legalMoves(s: GameState, player: PlayerId): Pos[] {
+    const out: Pos[] = [];
     const from = s.pawn[player];
-    if (!inBounds(s, to)) return false;
-    const dr = Math.abs(from.r - to.r);
-    const dc = Math.abs(from.c - to.c);
-    if (dr + dc !== 1) return false;
-    if (blocked(s, from, to)) return false;
     const other = s.pawn[player === 0 ? 1 : 0];
-    if (other.r === to.r && other.c === to.c) return false;
-    return true;
+
+    const DIRS: Pos[] = [
+        { r: -1, c: 0 }, // up
+        { r: 1, c: 0 },  // down
+        { r: 0, c: -1 }, // left
+        { r: 0, c: 1 },  // right
+    ];
+
+    for (const d of DIRS) {
+        const n: Pos = { r: from.r + d.r, c: from.c + d.c };
+        if (!inBounds(s, n) || blocked(s, from, n)) continue;
+
+        if (eq(n, other)) {
+            // Intento de salto por detrás en la misma dirección
+            const behind: Pos = { r: n.r + d.r, c: n.c + d.c };
+            if (inBounds(s, behind) && !blocked(s, n, behind) && !occupied(s, behind)) {
+                out.push(behind);
+                continue; // si se puede saltar, no hay diagonales en esta dirección
+            }
+
+            // Diagonales alrededor del rival (si no se puede saltar)
+            const diags: Pos[] = d.r !== 0
+                ? [{ r: n.r, c: n.c - 1 }, { r: n.r, c: n.c + 1 }] // venimos vertical -> diagonales izquierda/derecha
+                : [{ r: n.r - 1, c: n.c }, { r: n.r + 1, c: n.c }];  // venimos horizontal -> diagonales arriba/abajo
+
+            for (const dg of diags) {
+                if (!inBounds(s, dg)) continue;
+                if (!blocked(s, n, dg) && !occupied(s, dg)) out.push(dg);
+            }
+        } else {
+            // Paso simple
+            if (!occupied(s, n)) out.push(n);
+        }
+    }
+    return out;
 }
 
-export function applyMoveSimple(s: GameState, player: PlayerId, to: Pos): GameState {
+export function canMove(s: GameState, player: PlayerId, to: Pos) {
+    if (!inBounds(s, to)) return false;
+    return legalMoves(s, player).some((p) => p.r === to.r && p.c === to.c);
+}
+
+export function applyMove(s: GameState, player: PlayerId, to: Pos): GameState {
     const next: GameState = structuredClone(s);
     next.pawn[player] = { ...to };
     if (isGoal(next, player, to)) next.winner = player;

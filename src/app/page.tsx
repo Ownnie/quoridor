@@ -81,10 +81,6 @@ export default function ModeSelectionPage() {
           </Link>
         </div>
       </section>
-
-      <footer className="text-xs text-neutral-500">
-        UI sobria / moderna · Tailwind v4 · Next.js App Router
-      </footer>
     </main>
   );
 }

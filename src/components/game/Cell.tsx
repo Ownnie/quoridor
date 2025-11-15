@@ -2,7 +2,7 @@
 
 import type { Pos } from "@/lib/core/types";
 import { useGame, playerColor } from "@/lib/store/gameStore";
-import { canMoveSimple } from "@/lib/core/rules";
+import { canMove } from "@/lib/core/rules";
 
 /**
  * - Botón ocupa toda la celda (cuadrada gracias a `aspect-square` del grid padre).
@@ -10,12 +10,12 @@ import { canMoveSimple } from "@/lib/core/rules";
  * - Destinos legales: overlay con fondo suave + ring visible.
  */
 export function Cell({ r, c }: Pos) {
-    const { state, dispatch } = useGame();
+    const { state, dispatch, inputDisabled } = useGame();
 
     const isP0 = state.pawn[0].r === r && state.pawn[0].c === c;
     const isP1 = state.pawn[1].r === r && state.pawn[1].c === c;
 
-    const legalTarget = canMoveSimple(state, state.turn, { r, c });
+    const legalTarget = !inputDisabled && canMove(state, state.turn, { r, c });
 
     function onClick() {
         if (!legalTarget) return;
@@ -28,6 +28,7 @@ export function Cell({ r, c }: Pos) {
             className={`relative flex h-full w-full items-center justify-center rounded-lg
         transition ${legalTarget ? "hover:brightness-110" : "hover:brightness-105"}`}
             aria-label={`cell-${r}-${c}`}
+            disabled={inputDisabled}
         >
             {/* Overlay de destino legal (fondo + ring) */}
             {legalTarget && (

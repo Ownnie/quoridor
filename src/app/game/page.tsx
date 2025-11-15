@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { FadeIn } from "@/components/ui/FadeIn";
-import { GameProvider } from "@/lib/store/gameStore";
+import { GameProvider, useGame } from "@/lib/store/gameStore";
 import { Board } from "@/components/game/Board";
 import { Hud } from "@/components/game/Hud";
 import type { Mode } from "@/lib/core/types";
@@ -20,12 +20,15 @@ export default function GamePage() {
                         <h2 className="text-xl font-semibold tracking-tight">
                             Juego — {mode === "cpu" ? "Persona vs Máquina" : "Persona vs Persona"}
                         </h2>
-                        <Link
-                            href="/"
-                            className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800/80"
-                        >
-                            &larr; Menú
-                        </Link>
+                        <div className="flex items-center gap-2">
+                            <RestartButton />
+                            <Link
+                                href="/"
+                                className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800/80"
+                            >
+                                &larr; Menú
+                            </Link>
+                        </div>
                     </div>
 
                     <Hud />
@@ -34,11 +37,21 @@ export default function GamePage() {
                         <Board size={9} />
                     </section>
 
-                    <p className="text-center text-xs text-neutral-500">
-                        Base minimal: movimiento ortogonal de 1 paso. Próximo sprint: saltos, diagonales y muros + BFS.
-                    </p>
+                    <p className="text-center text-xs text-neutral-500">Turnos automáticos para Azul en modo CPU (heurística codiciosa).</p>
                 </main>
             </FadeIn>
         </GameProvider>
+    );
+}
+
+function RestartButton() {
+    const { reset } = useGame();
+    return (
+        <button
+            onClick={() => reset()}
+            className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800/80"
+        >
+            Reiniciar
+        </button>
     );
 }
