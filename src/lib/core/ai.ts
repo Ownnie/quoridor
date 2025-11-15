@@ -1,4 +1,4 @@
-import type { GameState, PlayerId, Pos } from "./types";
+import type { GameState, PlayerId } from "./types";
 import type { Action } from "./engine";
 import { legalMoves, applyMove, canPlaceWall, applyPlaceWall } from "./rules";
 import { shortestDistanceToGoal } from "./bfs";

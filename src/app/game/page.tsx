@@ -1,6 +1,4 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
+// Página server component: obtenemos searchParams vía props para evitar CSR y el Suspense warning.
 import { FadeIn } from "@/components/ui/FadeIn";
 import { GameProvider, useGame } from "@/lib/store/gameStore";
 import { Board } from "@/components/game/Board";
@@ -8,9 +6,8 @@ import { Hud } from "@/components/game/Hud";
 import type { Mode } from "@/lib/core/types";
 import Link from "next/link";
 
-export default function GamePage() {
-    const sp = useSearchParams();
-    const mode = (sp.get("mode") as Mode) || "cpu";
+export default function GamePage({ searchParams }: { searchParams: { mode?: string } }) {
+    const mode = (searchParams.mode as Mode) || "cpu";
 
     return (
         <GameProvider mode={mode}>
